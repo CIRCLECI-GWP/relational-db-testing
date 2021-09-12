@@ -44,6 +44,38 @@ describe("Database Tests", () => {
         }
     }, 60000);
 
+    it("Test UPDATE and DELETE", async () => {
+        try {
+            let name = "Test user";
+            let email = "test@user.com";
+            let nameUpdate = "My Test User";
+
+            let insertSQL = `INSERT INTO users (id, name, email) VALUES (NULL, '${name}', '${email}');`;
+
+            await connection.query(insertSQL);
+
+            //Run and test update
+            let updateSQL = `UPDATE users SET name='${nameUpdate}' WHERE email='${email}'`;
+            await connection.query(updateSQL);
+
+            const [rows, fields] = await connection.query("SELECT * FROM users");
+            expect(rows[0].name).toBe(nameUpdate);
+
+            //Run and test delete
+            let deleteSQL = `DELETE FROM users WHERE email='${email}'`;
+            await connection.query(deleteSQL);
+
+            const [allrows] = await connection.query("SELECT * FROM users");
+            expect(allrows.length).toBe(0);
+        } catch (error) {
+            console.log(error);
+            let dropTableSQL = "DROP TABLE IF EXISTS `users`";
+            await connection.query(dropTableSQL);
+            await connection.end();
+        }
+    }, 60000);
+
+
     afterEach(async () => {
         let dropTableSQL = "DROP TABLE IF EXISTS `users`";
         await connection.query(dropTableSQL);
